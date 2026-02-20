@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Survive the Paycheck</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .game-container {
+      background: #020617;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 900px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      border: 1px solid #1f2937;
+    }
+
+    h1 {
+      margin-top: 0;
+      text-align: center;
+      color: #facc15;
+      letter-spacing: 0.05em;
+    }
+
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .stat {
+      background: #020617;
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid #1f2937;
+      min-width: 140px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #9ca3af;
+      letter-spacing: 0.08em;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .progress-bar {
+      background: #111827;
+      border-radius: 999px;
+      overflow: hidden;
+      height: 10px;
+      margin-top: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #facc15, #ef4444);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .main-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 800px) {
+      .main-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 10px;
+      padding: 14px 16px;
+      border: 1px solid #1f2937;
+    }
+
+    .card-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #9ca3af;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+
+    #log {
+      max-height: 260px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    #log p {
+      margin: 4px 0;
+    }
+
+    #event-text {
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    button.choice-btn {
+      background: #111827;
+      color: #e5e7eb;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.15s, transform 0.05s, border-color 0.15s;
+    }
+
+    button.choice-btn:hover {
+      background: #1f2937;
+      border-color: #4b5563;
+    }
+
+    button.choice-btn:active {
+      transform: scale(0.98);
+    }
+
+    .choice-cost {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .footer-bar {
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .btn-primary {
+      background: #22c55e;
+      color: #022c22;
+      border-radius: 999px;
+      border: none;
+      padding: 8px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.15s, transform 0.05s, box-shadow 0.15s;
+    }
+
+    .btn-primary:hover {
+      background: #16a34a;
+      box-shadow: 0 0 0 1px #bbf7d0;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .tag-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .tag-dot.danger {
+      background: #ef4444;
+    }
+
+    .tag-dot.warn {
+      background: #facc15;
+    }
+
+    .muted {
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .highlight {
+      color: #facc15;
+      font-weight: 600;
+    }
+
+    .game-over {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .game-over.win {
+      color: #22c55e;
+    }
+
+    .game-over.lose {
+      color: #ef4444;
+    }
+
+    .fixed-costs-list {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .fixed-costs-list span {
+      color: #9ca3af;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #111827;
+      font-size: 11px;
+      margin-right: 4px;
+      margin-top: 2px;
+    }
+
+    a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Survive the Paycheck</h1>
+
+    <div class="top-bar">
+      <div class="stat">
+        <div class="stat-label">Balance</div>
+        <div class="stat-value" id="balance">$0</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="savings-bar"></div>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Day</div>
+        <div class="stat-value" id="day">1 / 30</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Stress</div>
+        <div class="stat-value" id="stress">0%</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="stress-bar"></div>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Job</div>
+        <div class="stat-value" id="job">Hourly worker</div>
+      </div>
+    </div>
+
+    <div class="main-panel">
+      <div class="card">
+        <div class="card-title">Today’s situation</div>
+        <div id="event-text"></div>
+        <div class="choices" id="choices"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Month overview</div>
+        <div class="fixed-costs-list">
+          <p><span>Monthly income (after tax):</span> <span id="income-label">$2,000</span></p>
+          <p><span>Fixed bills:</span></p>
+          <p>
+            <span class="pill">Rent: $900</span>
+            <span class="pill">Utilities: $150</span>
+            <span class="pill">Phone: $60</span>
+            <span class="pill">Transport: $120</span>
+            <span class="pill">Groceries: $300</span>
+          </p>
+          <p class="muted">
+            Your goal: reach day 30 without your balance going below $0 or your stress hitting 100%.
+          </p>
+          <hr style="border-color:#111827;margin:10px 0;">
+          <div id="log"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bar">
+      <div>
+        <span class="tag">
+          <span class="tag-dot" id="status-dot"></span>
+          <span id="status-text">Month just started</span>
+        </span>
+        <span class="muted">Make choices, juggle bills, and try not to break.</span>
+      </div>
+      <div>
+        <button class="btn-primary" id="restart-btn" style="display:none;">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Core game state
+    // -----------------------------
+    const DAYS_IN_MONTH = 30;
+
+    const baseState = {
+      day: 1,
+      balance: 2000, // after-tax paycheck at start of month
+      stress: 10,    // 0–100
+      income: 2000,
+      gameOver: false
+    };
+
+    const fixedBills = [
+      { name: "Rent", amount: 900, dueDay: 1 },
+      { name: "Utilities", amount: 150, dueDay: 5 },
+      { name: "Phone", amount: 60, dueDay: 10 },
+      { name: "Transport pass", amount: 120, dueDay: 3 },
+      { name: "Groceries", amount: 300, dueDay: 7 }
+    ];
+
+    let state = { ...baseState };
+
+    // -----------------------------
+    // Events / scenarios
+    // -----------------------------
+    const events = [
+      {
+        id: "friend-birthday",
+        text: "A close friend invites you to their birthday dinner at a nice restaurant.",
+        choices: [
+          {
+            label: "Go and spend generously.",
+            cost: -80,
+            stress: -5,
+            log: "You went to the dinner and had a great time, but it cost you $80."
+          },
+          {
+            label: "Go but order something cheap.",
+            cost: -30,
+            stress: -2,
+            log: "You showed up, kept it modest, and spent $30."
+          },
+          {
+            label: "Skip and send a text apology.",
+            cost: 0,
+            stress: +8,
+            log: "You skipped the dinner to save money, but you feel guilty and more stressed."
+          }
+        ]
+      },
+      {
+        id: "sick-day",
+        text: "You wake up feeling sick. Your job doesn’t offer paid sick days.",
+        choices: [
+          {
+            label: "Call in sick and rest.",
+            cost: -80, // lost wages
+            stress: -5,
+            log: "You stayed home, lost a day of pay, but your body thanks you."
+          },
+          {
+            label: "Push through and go to work.",
+            cost: 0,
+            stress: +10,
+            log: "You worked while sick. You kept your pay, but your stress shot up."
+          }
+        ]
+      },
+      {
+        id: "side-gig",
+        text: "A friend offers you a one-day side gig helping move furniture.",
+        choices: [
+          {
+            label: "Take the gig after work.",
+            cost: +70,
+            stress: +8,
+            log: "You took the side gig and earned $70, but you’re exhausted."
+          },
+          {
+            label: "Decline and rest.",
+            cost: 0,
+            stress: -3,
+            log: "You declined the gig and used the time to rest a bit."
+          }
+        ]
+      },
+      {
+        id: "car-trouble",
+        text: "Your car makes a worrying noise on the way home.",
+        choices: [
+          {
+            label: "Get it checked immediately.",
+            cost: -120,
+            stress: +2,
+            log: "You paid $120 for a repair, but avoided a bigger breakdown."
+          },
+          {
+            label: "Ignore it and hope it’s fine.",
+            cost: 0,
+            stress: +6,
+            log: "You ignored the noise. You saved money today, but you’re anxious it’ll get worse."
+          }
+        ]
+      },
+      {
+        id: "grocery-choice",
+        text: "You’re out of groceries and need to restock.",
+        choices: [
+          {
+            label: "Buy fresh, healthy groceries.",
+            cost: -80,
+            stress: -4,
+            log: "You bought healthy groceries. It cost more, but you feel better."
+          },
+          {
+            label: "Buy cheap instant food.",
+            cost: -40,
+            stress: +2,
+            log: "You bought cheaper, less healthy food and saved some money."
+          },
+          {
+            label: "Stretch what’s left at home.",
+            cost: -10,
+            stress: +6,
+            log: "You stretched what you had. You’re hungry and more stressed, but you saved money."
+          }
+        ]
+      },
+      {
+        id: "family-help",
+        text: "A family member asks if you can help them with a $50 loan.",
+        choices: [
+          {
+            label: "Send the $50.",
+            cost: -50,
+            stress: +2,
+            log: "You helped your family member with $50. Money is tighter, but you feel supportive."
+          },
+          {
+            label: "Explain you can’t right now.",
+            cost: 0,
+            stress: +5,
+            log: "You said no. You protected your budget, but you feel guilty."
+          }
+        ]
+      },
+      {
+        id: "bill-reminder",
+        text: "You remember a bill is coming up soon.",
+        choices: [
+          {
+            label: "Set aside $60 now.",
+            cost: -60,
+            stress: -2,
+            log: "You set aside $60 for the bill. Future you is a bit less stressed."
+          },
+          {
+            label: "Hope you’ll have enough later.",
+            cost: 0,
+            stress: +4,
+            log: "You didn’t set money aside. You’re hoping it works out."
+          }
+        ]
+      },
+      {
+        id: "mental-break",
+        text: "You’re feeling overwhelmed. A friend suggests a cheap park hangout.",
+        choices: [
+          {
+            label: "Go to the park and relax.",
+            cost: -5,
+            stress: -10,
+            log: "You spent a little on snacks and had a real mental break."
+          },
+          {
+            label: "Stay home and keep grinding.",
+            cost: 0,
+            stress: +5,
+            log: "You stayed home to save money, but the stress keeps building."
+          }
+        ]
+      }
+    ];
+
+    // -----------------------------
+    // Utility functions
+    // -----------------------------
+    function formatMoney(amount) {
+      const sign = amount < 0 ? "-" : "";
+      const v = Math.abs(amount).toFixed(0);
+      return sign + "$" + v;
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function randomEvent() {
+      return events[Math.floor(Math.random() * events.length)];
+    }
+
+    function addLog(message) {
+      const log = document.getElementById("log");
+      const p = document.createElement("p");
+      p.textContent = message;
+      log.prepend(p);
+    }
+
+    // -----------------------------
+    // Rendering
+    // -----------------------------
+    function renderStats() {
+      document.getElementById("balance").textContent = formatMoney(state.balance);
+      document.getElementById("day").textContent = state.day + " / " + DAYS_IN_MONTH;
+      document.getElementById("stress").textContent = state.stress.toFixed(0) + "%";
+
+      const savingsPercent = clamp((state.balance / state.income) * 100, 0, 100);
+      document.getElementById("savings-bar").style.width = savingsPercent + "%";
+      document.getElementById("stress-bar").style.width = clamp(state.stress, 0, 100) + "%";
+
+      const statusDot = document.getElementById("status-dot");
+      const statusText = document.getElementById("status-text");
+
+      if (state.gameOver) {
+        statusDot.className = "tag-dot danger";
+        statusText.textContent = "Game over";
+      } else if (state.stress >= 70 || state.balance < 100) {
+        statusDot.className = "tag-dot warn";
+        statusText.textContent = "You’re on the edge";
+      } else {
+        statusDot.className = "tag-dot";
+        statusText.textContent = "Holding it together";
+      }
+    }
+
+    function renderEvent() {
+      const event = randomEvent();
+      state.currentEvent = event;
+
+      const eventText = document.getElementById("event-text");
+      const choicesContainer = document.getElementById("choices");
+      eventText.textContent = event.text;
+      choicesContainer.innerHTML = "";
+
+      event.choices.forEach((choice, index) => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.innerHTML = `
+          <div>${choice.label}</div>
+          <div class="choice-cost">
+            Money: ${choice.cost === 0 ? "$0" : formatMoney(choice.cost)} · Stress: ${choice.stress > 0 ? "+" : ""}${choice.stress}
+          </div>
+        `;
+        btn.addEventListener("click", () => handleChoice(index));
+        choicesContainer.appendChild(btn);
+      });
+    }
+
+    function renderGameOver(message, win) {
+      const eventText = document.getElementById("event-text");
+      const choicesContainer = document.getElementById("choices");
+      const restartBtn = document.getElementById("restart-btn");
+
+      eventText.innerHTML = `
+        <div class="game-over ${win ? "win" : "lose"}">${win ? "You survived the paycheck." : "You couldn’t make it this month."}</div>
+        <p>${message}</p>
+        <p class="muted">You can restart and try different choices.</p>
+      `;
+      choicesContainer.innerHTML = "";
+      restartBtn.style.display = "inline-block";
+    }
+
+    // -----------------------------
+    // Game logic
+    // -----------------------------
+    function applyBillsForToday() {
+      const dueToday = fixedBills.filter(b => b.dueDay === state.day);
+      dueToday.forEach(bill => {
+        state.balance -= bill.amount;
+        addLog(`Bill paid: ${bill.name} (${formatMoney(-bill.amount)})`);
+      });
+    }
+
+    function checkGameOver() {
+      if (state.balance < 0) {
+        state.gameOver = true;
+        renderStats();
+        renderGameOver("Your balance went negative. The bank fees and stress were too much to handle.", false);
+        addLog("You overdrafted your account. Game over.");
+        return true;
+      }
+      if (state.stress >= 100) {
+        state.gameOver = true;
+        state.stress = 100;
+        renderStats();
+        renderGameOver("Your stress hit the limit. Your body and mind forced you to stop.", false);
+        addLog("Your stress maxed out. Game over.");
+        return true;
+      }
+      if (state.day > DAYS_IN_MONTH) {
+        state.gameOver = true;
+        renderStats();
+        const msg =
+          state.balance >= 0 && state.stress < 100
+            ? "You made it to the end of the month without going broke or burning out."
+            : "You reached the end of the month, but it took a heavy toll.";
+        renderGameOver(msg, state.balance >= 0 && state.stress < 100);
+        addLog("You reached the end of the month.");
+        return true;
+      }
+      return false;
+    }
+
+    function nextDay() {
+      if (state.gameOver) return;
+      state.day += 1;
+      applyBillsForToday();
+      renderStats();
+      if (!checkGameOver()) {
+        renderEvent();
+      }
+    }
+
+    function handleChoice(choiceIndex) {
+      if (state.gameOver) return;
+      const event = state.currentEvent;
+      const choice = event.choices[choiceIndex];
+
+      state.balance += choice.cost;
+      state.stress = clamp(state.stress + choice.stress, 0, 100);
+
+      addLog(choice.log + ` (Balance: ${formatMoney(state.balance)}, Stress: ${state.stress.toFixed(0)}%)`);
+
+      renderStats();
+
+      if (checkGameOver()) return;
+
+      // Move to next day after a short delay
+      setTimeout(() => {
+        nextDay();
+      }, 400);
+    }
+
+    function restartGame() {
+      state = { ...baseState };
+      document.getElementById("log").innerHTML = "";
+      document.getElementById("restart-btn").style.display = "none";
+      state.gameOver = false;
+      addLog("New month, new attempt to survive the paycheck.");
+      renderStats();
+      applyBillsForToday();
+      renderStats();
+      renderEvent();
+    }
+
+    // -----------------------------
+    // Init
+    // -----------------------------
+    document.getElementById("restart-btn").addEventListener("click", restartGame);
+
+    // Start game
+    (function init() {
+      addLog("You just got your paycheck: " + formatMoney(baseState.income) + ".");
+      addLog("Your fixed bills will hit throughout the month. Try to keep your balance above $0 and stress below 100%.");
+      renderStats();
+      applyBillsForToday();
+      renderStats();
+      renderEvent();
+    })();
+  </script>
+</body>
+</html>
